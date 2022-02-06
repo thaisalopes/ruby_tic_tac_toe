@@ -6,7 +6,7 @@ class Game
     @player2 = player2
     @turn = 1
     @current_player = player1
-    @end = false
+    @streak = Streak.new
     full_game
   end
 
@@ -28,9 +28,26 @@ class Game
   end
 
   def full_game
-    while @end == false
+    while over == false
       round
     end
+    announce_winner
+  end
+
+  def announce_winner
+    puts "Congratulations, #{@winner}! You won the game."
+  end
+
+  def over
+    case @streak.check_victory(@game_board.spaces)
+    when ""
+      false
+    when "X"
+      @winner = @player1.name
+      true
+    when "O"
+      @winner = @player2.name
+      true
   end
 end
 
@@ -43,20 +60,51 @@ class Player
 end
 
 class Board
+  attr_reader :spaces
   def initialize
-    @space = Array.new(9,"")
+    @spaces = Array.new(9,"")
   end
 
   def show_board
-    "|#{@space[0]}|#{@space[1]}|#{@space[2]}|" + 
-    "\n|#{@space[3]}|#{@space[4]}|#{@space[5]}|" +
-    "\n|#{@space[6]}|#{@space[7]}|#{@space[8]}|"
+    "|#{@spaces[0]}|#{@spaces[1]}|#{@spaces[2]}|" + 
+    "\n|#{@spaces[3]}|#{@spaces[4]}|#{@spaces[5]}|" +
+    "\n|#{@spaces[6]}|#{@spaces[7]}|#{@spaces[8]}|"
   end
 
   def write_on_board (player, position)
-    @space[position.to_i-1] = player.marker_type
+    @spaces[position.to_i-1] = player.marker_type
   end
+  
 end  
+
+class Streak
+  def initialize
+    @streaks = [[0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [3,5,8],
+    [0,4,8],
+    [2,4,6]]
+  end
+
+  def check_victory(spaces)
+    @streaks.each |streak| do 
+      space1 = spaces[streak[0]]
+      space2 = spaces[streak[1]]
+      space3 = spaces[streak[2]]
+      victory_check_array = [space1,space2,space3]
+      puts victory_check_array.uniq.join
+      continue if victory_check_array.any?("")    
+      if victory_check_array.uniq.size == 1
+        return victory_check_array.uniq.join
+      end
+    end
+    return ""
+  end
+
+end
 
 puts "Please enter Player 1's name"
 player1_name = gets.chomp
