@@ -22,9 +22,13 @@ class Game
   def round
     puts "#{@current_player.name}, where would you like to put a marker?"
     position = gets.chomp
-    @game_board.write_on_board(@current_player,position)
+    if @game_board.spaces[position.to_i-1] != " "
+      puts "This one is already taken, please choose another one"
+    else 
+      @game_board.write_on_board(@current_player,position)
     puts @game_board.show_board
     manage_turns
+    end
   end
 
   def full_game
@@ -32,15 +36,24 @@ class Game
     while over == false
       round
     end
-    announce_winner
+    if @type_of_victory == "TIE"
+      announce_tie
+    else
+      announce_winner
+    end
   end
 
   def announce_winner
     puts "Congratulations, #{@winner}! You won the game."
   end
 
+  def announce_tie
+    puts "It's a tie!"
+  end
+
   def over
     if @game_board.spaces.all?{ |value| value != " " }
+      @type_of_victory = "TIE"
       return true
     end
     case @streak.check_victory(@game_board.spaces)
