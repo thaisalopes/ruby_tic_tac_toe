@@ -28,6 +28,7 @@ class Game
   end
 
   def full_game
+    @game_board.show_initial_board
     while over == false
       round
     end
@@ -39,6 +40,9 @@ class Game
   end
 
   def over
+    if @game_board.spaces.all?{ |value| value != " " }
+      return true
+    end
     case @streak.check_victory(@game_board.spaces)
     when ""
       false
@@ -48,6 +52,7 @@ class Game
     when "O"
       @winner = @player2.name
       true
+    end
   end
 end
 
@@ -62,7 +67,14 @@ end
 class Board
   attr_reader :spaces
   def initialize
-    @spaces = Array.new(9,"")
+    @spaces = Array.new(9," ")
+  end
+
+  def show_initial_board
+    puts "|1|2|3|"+
+    "\n|4|5|6|"+
+    "\n|7|8|9|"+
+    "\nChoose the position according to the space number"
   end
 
   def show_board
@@ -74,7 +86,6 @@ class Board
   def write_on_board (player, position)
     @spaces[position.to_i-1] = player.marker_type
   end
-  
 end  
 
 class Streak
@@ -90,20 +101,18 @@ class Streak
   end
 
   def check_victory(spaces)
-    @streaks.each |streak| do 
+    @streaks.each do |streak| 
       space1 = spaces[streak[0]]
       space2 = spaces[streak[1]]
       space3 = spaces[streak[2]]
       victory_check_array = [space1,space2,space3]
-      puts victory_check_array.uniq.join
-      continue if victory_check_array.any?("")    
+      next if victory_check_array.any?(" ")    
       if victory_check_array.uniq.size == 1
         return victory_check_array.uniq.join
       end
     end
     return ""
   end
-
 end
 
 puts "Please enter Player 1's name"
@@ -113,11 +122,6 @@ player2_name = gets.chomp
 
 player1 = Player.new(player1_name,"X")
 player2 = Player.new(player2_name, "O")
-
-puts "Player 1 = #{player1.name}"
-puts "Player 2 = #{player2.name}"
-
-
 
 new_game = Game.new(player1,player2)
 
